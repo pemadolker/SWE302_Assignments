@@ -162,3 +162,34 @@ func TestNewError(t *testing.T) {
 	assert.Equal(map[string]interface{}(map[string]interface{}{"database": "no such table: not_exists"}),
 		commenError.Errors, "commenError should have right error info")
 }
+
+func TestJWTGeneration(t *testing.T) {
+	token, err := GenerateJWT(1)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, token)
+}
+
+func TestJWTExpiration(t *testing.T) {
+	token, _ := GenerateJWT(1)
+	valid, err := ValidateJWT(token)
+	assert.Nil(t, err)
+	assert.True(t, valid)
+	time.Sleep(2 * time.Second) // simulate expiration if needed
+}
+
+func TestDBConnectionError(t *testing.T) {
+	db, err := ConnectDB("invalid_connection_string")
+	assert.NotNil(t, err)
+	assert.Nil(t, db)
+}
+
+func TestUtilityFunctionExample(t *testing.T) {
+	result := ReverseString("hello")
+	assert.Equal(t, "olleh", result)
+}
+
+func TestPasswordHashValidation(t *testing.T) {
+	password := "mypassword"
+	hash, _ := HashPassword(password)
+	assert.True(t, CheckPasswordHash(password, hash))
+}

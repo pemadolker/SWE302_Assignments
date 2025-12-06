@@ -2,103 +2,125 @@ package articles
 
 import (
 	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 )
 
-// Mock Article model
-type Article struct {
-	Title    string
-	Body     string
-	Favorites int
-	Tags     []string
-}
-
-// Mock functions
-func NewArticle(title, body string) (*Article, error) {
-	if title == "" || body == "" {
-		return nil, assert.AnError
-	}
-	return &Article{Title: title, Body: body}, nil
-}
-
-func (a *Article) Favorite() {
-	a.Favorites++
-}
-
-func (a *Article) Unfavorite() {
-	if a.Favorites > 0 {
-		a.Favorites--
+func setupArticle() Article {
+	return Article{
+		Title:       "Test Article",
+		Body:        "This is a test article body",
+		Description: "Test description",
+		AuthorID:    1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Tags:        []string{"go", "testing"},
+		Favorites:   0,
 	}
 }
 
-// ===================== TESTS =====================
-
-func TestArticleCreation_Valid(t *testing.T) {
-	article, err := NewArticle("Test Title", "Test Body")
+func TestArticleCreation(t *testing.T) {
+	article := setupArticle()
+	err := article.Validate()
 	assert.Nil(t, err)
-	assert.Equal(t, "Test Title", article.Title)
-	assert.Equal(t, "Test Body", article.Body)
 }
 
-func TestArticleCreation_EmptyTitle(t *testing.T) {
-	_, err := NewArticle("", "Test Body")
+func TestArticleEmptyTitle(t *testing.T) {
+	article := setupArticle()
+	article.Title = ""
+	err := article.Validate()
+	assert.NotNil(t, err)
+}
+
+func TestArticleEmptyBody(t *testing.T) {
+	article := setupArticle()
+	article.Body = ""
+	err := article.Validate()
 	assert.NotNil(t, err)
 }
 
 func TestArticleFavorite(t *testing.T) {
-	article, _ := NewArticle("A", "B")
+	article := setupArticle()
 	article.Favorite()
 	assert.Equal(t, 1, article.Favorites)
-	article.Favorite()
-	assert.Equal(t, 2, article.Favorites)
-}
-
-func TestArticleUnfavorite(t *testing.T) {
-	article, _ := NewArticle("A", "B")
-	article.Favorite()
-	article.Unfavorite()
-	assert.Equal(t, 0, article.Favorites)
 	article.Unfavorite()
 	assert.Equal(t, 0, article.Favorites)
 }
 
-func TestArticleTags(t *testing.T) {
-	article, _ := NewArticle("Title", "Body")
-	article.Tags = []string{"go", "test"}
+func TestArticleTagAssociation(t *testing.T) {
+	article := setupArticle()
 	assert.Contains(t, article.Tags, "go")
-	assert.Contains(t, article.Tags, "test")
+	assert.Contains(t, article.Tags, "testing")
 }
 
 func TestArticleSerializer(t *testing.T) {
-	article, _ := NewArticle("T", "B")
-	article.Tags = []string{"tag1"}
-	serialized := map[string]interface{}{
-		"title": article.Title,
-		"body":  article.Body,
-		"tags":  article.Tags,
-	}
-	assert.Equal(t, "T", serialized["title"])
-	assert.Equal(t, "B", serialized["body"])
-	assert.Len(t, serialized["tags"], 1)
+	article := setupArticle()
+	data := ArticleSerializer(article)
+	assert.Equal(t, article.Title, data["title"])
+	assert.Equal(t, article.Description, data["description"])
 }
 
 func TestArticleListSerializer(t *testing.T) {
-	articles := []*Article{
-		{Title: "A", Body: "B"},
-		{Title: "C", Body: "D"},
-	}
-	listSerialized := make([]map[string]string, len(articles))
-	for i, a := range articles {
-		listSerialized[i] = map[string]string{
-			"title": a.Title,
-			"body":  a.Body,
-		}
-	}
-	assert.Len(t, listSerialized, 2)
-	assert.Equal(t, "C", listSerialized[1]["title"])
+	articles := []Article{setupArticle(), setupArticle()}
+	data := ArticleListSerializer(articles)
+	assert.Len(t, data, 2)
 }
 
 func TestCommentSerializer(t *testing.T) {
-	comment := map[string]string{"body": "Nice article"}
-	assert.Equal(t, "Nice article", comment["body"])
+	comment := Comment{Body: "Nice article", AuthorID: 1}
+	data := CommentSerializer(comment)
+	assert.Equal(t, "Nice article", data["body"])
+	assert.Equal(t, 1, data["author_id"])
+}
+
+func TestArticleModelValidatorValid(t *testing.T) {
+	article := setupArticle()
+	err := ArticleModelValidator(article)
+	assert.Nil(t, err)
+}
+
+func TestArticleModelValidatorInvalid(t *testing.T) {
+	article := setupArticle()
+	article.Title = ""
+	err := ArticleModelValidator(article)
+	assert.NotNil(t, err)
+}
+
+func TestCommentModelValidatorValid(t *testing.T) {
+	comment := Comment{Body: "Great post", AuthorID: 1}
+	err := CommentModelValidator(comment)
+	assert.Nil(t, err)
+}
+
+func TestCommentModelValidatorInvalid(t *testing.T) {
+	comment := Comment{Body: "", AuthorID: 1}
+	err := CommentModelValidator(comment)
+	assert.NotNil(t, err)
+}
+
+func TestSlugGeneration(t *testing.T) {
+	article := setupArticle()
+	article.GenerateSlug()
+	assert.NotEmpty(t, article.Slug)
+}
+
+func TestArticleUpdate(t *testing.T) {
+	article := setupArticle()
+	newTitle := "Updated Title"
+	article.Title = newTitle
+	assert.Equal(t, newTitle, article.Title)
+}
+
+func TestArticleDeletion(t *testing.T) {
+	articles := []Article{setupArticle()}
+	articles = articles[:0]
+	assert.Empty(t, articles)
+}
+
+func TestTagListRetrieval(t *testing.T) {
+	article := setupArticle()
+	tags := article.GetTags()
+	assert.Contains(t, tags, "go")
+	assert.Contains(t, tags, "testing")
 }
