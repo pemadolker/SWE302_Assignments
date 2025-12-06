@@ -75,5 +75,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          args: >
-            -Dsonar.verbose=true
+         args: >
+          -Dsonar.verbose=true
+          -Dsonar.projectBaseDir=.
+          
+          # === Go backend ===
+          -Dsonar.sources=golang-gin-realworld-example-app
+          -Dsonar.tests=golang-gin-realworld-example-app
+          -Dsonar.go.coverage.reportPaths=go-coverage.out
+          
+          # === React frontend ===
+          -Dsonar.javascript.lcov.reportPaths=react-coverage/lcov.info
+          -Dsonar.sources=golang-gin-realworld-example-app,react-redux-realworld-example-app
