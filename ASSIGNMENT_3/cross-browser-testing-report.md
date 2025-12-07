@@ -1,9 +1,6 @@
 # Cross-Browser Testing Report
 
-**Assignment 3: E2E Testing with Cypress**  
-**Student:** [Your Name]  
-**Date:** November 30, 2025  
-**Application:** React-Redux RealWorld Example App (Conduit)
+
 
 ---
 
@@ -641,31 +638,3 @@ npx cypress run --spec "cypress/e2e/auth/login.cy.js"
 # With video disabled (faster)
 npx cypress run --video false
 ```
-
----
-
-## Appendix B: Test Artifacts
-
-### Video Recordings
-- **Location:** `cypress/videos/`
-- **Format:** MP4 (H.264)
-- **Electron videos:** Compressed, ~2MB each
-- **Firefox videos:** Uncompressed, ~10MB each
-
-### Screenshots  
-- **Location:** `cypress/screenshots/`
-- **Format:** PNG
-- **Captured on:** Test failure only
-- **Organization:** By test file and test name
-
-### Test Results
-- **Electron results:** 24 passed, 16 failed, 0 skipped
-- **Firefox results:** 21 passed, 13 failed, 6 skipped
-- **Combined evidence:** 45 passed, 29 failed, 6 skipped (80 total)
-
----
-
-**Report Status:** ✅ COMPLETE  
-**Report Date:** November 30, 2025  
-**Next Review:** After P0 fixes implemented  
-**Estimated Next Test Date:** December 7, 2025
